@@ -1,0 +1,38 @@
+{
+    "name": "blazing.webpack",
+    "version": "1.0.0",
+    "main": "app.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "tsc --build",
+        "clean": "tsc --build --clean"
+    },
+    "author": "Connor 'Stryxus' Shearer",
+    "license": "MIT",
+    "devDependencies": {
+        "@types/node": "^20.8.9",
+        "@types/webpack": "^5.28.4",
+        "@typescript-eslint/eslint-plugin": "^6.9.0",
+        "@typescript-eslint/parser": "^6.9.0",
+        "autoprefixer": "^10.4.16",
+        "css-loader": "^6.8.1",
+        "eslint": "^8.52.0",
+        "eslint-webpack-plugin": "^4.0.1",
+        "file-loader": "^6.2.0",
+        "html-webpack-plugin": "^5.5.3",
+        "image-size": "^1.0.2",
+        "mini-css-extract-plugin": "^2.7.6",
+        "postcss": "^8.4.31",
+        "postcss-loader": "^7.3.3",
+        "prettier": "^3.0.3",
+        "resolve-url-loader": "^5.0.0",
+        "sass": "^1.69.5",
+        "sass-loader": "^13.3.2",
+        "sharp": "^0.32.6",
+        "style-loader": "^3.3.3",
+        "terser-webpack-plugin": "^5.3.9",
+        "ts-loader": "^9.5.0",
+        "typescript": "^5.2.2",
+        "webpack": "^5.89.0"
+    }
+}

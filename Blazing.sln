@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34221.43
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "Blazing.Webpack", "Blazing.Webpack\Blazing.Webpack.esproj", "{0D684C40-52C7-46AF-AE84-954F2F375D93}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazing", "Blazing\Blazing.csproj", "{397F1431-C117-430A-9BA7-B0EC4DEF3AD1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{16173FBA-0745-4579-994A-314D8F60CC1D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Stryxus.Client", "..\Website\Client\Stryxus.Client.csproj", "{DCCAA7BC-96BB-4835-93A9-E4DC35F1B6A6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0D684C40-52C7-46AF-AE84-954F2F375D93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D684C40-52C7-46AF-AE84-954F2F375D93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D684C40-52C7-46AF-AE84-954F2F375D93}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{0D684C40-52C7-46AF-AE84-954F2F375D93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D684C40-52C7-46AF-AE84-954F2F375D93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D684C40-52C7-46AF-AE84-954F2F375D93}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{397F1431-C117-430A-9BA7-B0EC4DEF3AD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{397F1431-C117-430A-9BA7-B0EC4DEF3AD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{397F1431-C117-430A-9BA7-B0EC4DEF3AD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{397F1431-C117-430A-9BA7-B0EC4DEF3AD1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCCAA7BC-96BB-4835-93A9-E4DC35F1B6A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCCAA7BC-96BB-4835-93A9-E4DC35F1B6A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCCAA7BC-96BB-4835-93A9-E4DC35F1B6A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCCAA7BC-96BB-4835-93A9-E4DC35F1B6A6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DCCAA7BC-96BB-4835-93A9-E4DC35F1B6A6} = {16173FBA-0745-4579-994A-314D8F60CC1D}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FDDF56D4-60A0-416D-8159-FD6936E1CDEC}
+	EndGlobalSection
+EndGlobal
