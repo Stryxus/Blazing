@@ -1,6 +1,4 @@
-const crypto = require('crypto');
-const path = require('path');
-const fs = require('fs/promises');
+import crypto from 'crypto';
 
 const sharp = require('sharp');
 const sizeOf = require('image-size');

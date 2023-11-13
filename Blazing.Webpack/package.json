@@ -1,7 +1,6 @@
 {
     "name": "blazing.webpack",
     "version": "1.0.0",
-    "main": "app.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build": "tsc --build",
@@ -32,6 +31,8 @@
         "style-loader": "^3.3.3",
         "terser-webpack-plugin": "^5.3.9",
         "ts-loader": "^9.5.0",
+        "ts-node": "^10.9.1",
+        "tsconfig-paths-webpack-plugin": "^4.1.0",
         "typescript": "^5.2.2",
         "webpack": "^5.89.0"
     }

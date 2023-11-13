@@ -6,6 +6,7 @@ import * as HtmlWebpackPlugin from 'html-webpack-plugin';
 import * as MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import * as ESLintPlugin from 'eslint-webpack-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
+import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 
 import BlazingMediaMinificationPlugin from './plugins/blazingMediaMinificationPlugin';
 import BlazingCachePlugin from './plugins/blazingCachePlugin';
@@ -24,6 +25,26 @@ process.argv.forEach((val, index, array) => {
 
 if (argEnv && argPath)
 {
+    /*
+    var backs;
+    var relativPath = argPath.substring(2 + (backs = (argPath.match('../') || []).length * 3) + 1);
+    for (var i = 0; i < backs; i++)
+    {
+        relativPath = `../${relativPath}`;
+    }
+    relativPath = `./${relativPath}`;
+    var wwwrootdevPath = path.resolve(argPath, 'wwwroot-dev');
+    var blazingAssetsPath: string | undefined = `${relativPath}/wwwroot-dev/blazing-assets`;
+
+    fs.truncate('./src/proxy.ts', 0, err =>
+    {
+        if (err) console.error(err);
+        fs.writeFile('./src/proxy.ts', `import(\'${blazingAssetsPath}\');`, err =>
+        {
+            if (err) console.error(err);
+        });
+    });
+    */
     const config: webpack.Configuration = {
         mode: argEnv == 'dev' ? 'development' : 'production',
         entry: path.resolve(argPath, 'wwwroot-dev', 'blazing-assets.js'),
@@ -61,13 +82,14 @@ if (argEnv && argPath)
                 {
                     test: /\.sass$/i,
                     use: [
-                        { loader: MiniCssExtractPlugin.loader },
-                        { loader: require.resolve('ts-loader'), options: { sourceMap: argEnv === 'dev' } },
+                        { loader: require.resolve('style-loader'), },
+                        { loader: require.resolve('css-loader'), options: { sourceMap: argEnv === 'dev' } },
                         {
                             loader: require.resolve('postcss-loader'),
                             options: {
                                 postcssOptions: {
-                                    plugins: () => {
+                                    plugins: () =>
+                                    {
                                         return [
                                             require('autoprefixer')
                                         ];
@@ -81,7 +103,9 @@ if (argEnv && argPath)
                 {
                     test: /\.ts$/i,
                     loader: require.resolve('ts-loader'),
-                    exclude: /node_modules/,
+                    options: {
+                        configFile: path.resolve(argPath, 'wwwroot-dev', 'tsconfig.json'),
+                    },
                 },
                 {
                     test: /\.(png|json|mp4|aac|svg)$/i,
@@ -118,6 +142,11 @@ if (argEnv && argPath)
             new BlazingMediaMinificationPlugin(),
             new BlazingCachePlugin(),
         ],
+        resolveLoader: {
+            plugins: [
+                new TsconfigPathsPlugin({ configFile: path.resolve(argPath, 'wwwroot-dev', 'tsconfig.json'), })
+            ]
+        },
         optimization: {
             splitChunks: {
                 maxSize: 100000,
