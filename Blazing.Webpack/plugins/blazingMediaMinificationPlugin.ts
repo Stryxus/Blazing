@@ -1,30 +1,34 @@
 import crypto from 'crypto';
 
-import sharp, { OutputInfo } from 'sharp';
+import webpack, { AssetInfo } from 'webpack';
+import sharp from 'sharp';
 import sizeOf from 'image-size';
+import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 
-const dev = process.env.NODE_ENV === 'development';
-const intl = new Intl.NumberFormat('en-IN', { maximumSignificantDigits: 3 });
-const maxWidthHeight = 3840;
-const byteMaxSize = dev ? 1000000 : 100000;
+import { Log } from '../utils';
 
+const dev = process.env.NODE_ENV !== 'production';
 var caches: string[] = [];
-import webpack from 'webpack';
 
 export default class BlazingMediaMinificationPlugin {
     apply(compiler: webpack.Compiler) {
-        compiler.hooks.compilation.tap('BlazingMediaMinificationPlugin', compilation => {
-            compilation.hooks.processAssets.tapPromise({
+        compiler.hooks.compilation.tap('BlazingMediaMinificationPlugin', compilation =>
+        {
+            compilation.hooks.optimizeAssets.tapPromise({
                 name: 'BlazingMediaMinificationPlugin',
                 stage: webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
-            }, async assets => {
+            }, async assets =>
+            {
                 const sources = compilation.compiler.webpack.sources;
+                console.log(`${Log.fg.green}Starting Media Transcoding and Optimisation Stage...${Log.reset}`);
 
-                for (const [pathname, source] of Object.entries(assets)) {
-                    const assetInfo = compilation.assetsInfo.get(pathname);
+                for (const [pathname, source] of Object.entries(assets))
+                {
+                    const assetInfo: AssetInfo | undefined = compilation.assetsInfo.get(pathname);
 
-                    if (assetInfo && assetInfo.sourceFilename && pathname.endsWith('.png') && assetInfo.sourceFilename.startsWith('img/')) {
-                        const imgSize = sizeOf(source.buffer());
+                    if (assetInfo && assetInfo.sourceFilename && pathname.endsWith('.png') && assetInfo.sourceFilename.startsWith('img/'))
+                    {
+                        const imgSize: ISizeCalculationResult = sizeOf(source.buffer());
 
                         if (imgSize && imgSize.width && imgSize.height) {
                             const hash = crypto.createHash('sha1');
@@ -40,34 +44,13 @@ export default class BlazingMediaMinificationPlugin {
                                 var avif: Buffer | undefined;
                                 var webp: Buffer | undefined;
                                 const img = sharp(source.buffer());
-                                const ratio = Math.min(maxWidthHeight / imgSize.width, maxWidthHeight / imgSize.height);
-                                var qualityDecrement = 0;
-                                for (var x = 1; x > 0; x -= 0.25) {
-                                    let max = Math.floor(maxWidthHeight * x);
 
-                                    if (x < 1) {
-                                        if (imgSize.height > imgSize.width) {
-                                            if (imgSize.width > max) img.resize(max, Math.floor(imgSize.height * ratio));
-                                            if (imgSize.height > max) img.resize(Math.floor(imgSize.width * ratio), max);
-                                        } else {
-                                            if (imgSize.height > max) img.resize(Math.floor(imgSize.width * ratio), max);
-                                            if (imgSize.width > max) img.resize(max, Math.floor(imgSize.height * ratio));
-                                        }
-                                    }
+                                await resize(assetInfo, img, imgSize.width, imgSize.height);
+                                avif = await transcode(assetInfo, img, Format.AVIF);
+                                webp = await transcode(assetInfo, img, Format.WEBP);
 
-                                    for (var y = 0; y < (dev ? 15 : 30); y++) {
-                                        qualityDecrement = y;
-                                        img.avif({ quality: 100 - (y * (dev ? 5 : 2)), effort: dev ? 0 : 6 })
-                                        avif = await img.toBuffer();
-                                        if (avif && avif.byteLength <= byteMaxSize) break;
-                                    }
-                                    if (avif && avif.byteLength <= byteMaxSize) break;
-                                }
-
-                                img.webp({ quality: 100 - (qualityDecrement * 5), effort: dev ? 0 : 6 })
-                                webp = await img.toBuffer();
-
-                                if (avif && webp) { // This should never fail but it makes the analyser happy.
+                                if (avif && webp) // This should never fail but it makes the analyser happy.
+                                {
                                     compilation.deleteAsset(pathname);
                                     compilation.emitAsset(pathname.replace('.png', '.avif'), new sources.RawSource(avif));
                                     compilation.emitAsset(pathname.replace('.png', '.webp'), new sources.RawSource(webp));
@@ -81,4 +64,98 @@ export default class BlazingMediaMinificationPlugin {
             });
         });
     }
+}
+
+enum Format
+{
+    AVIF = 'AVIF',
+    WEBP = 'WebP',
+}
+
+async function resize(asset: AssetInfo, img: sharp.Sharp, width: number, height: number)
+{
+    const maxWidthHeight = 3840;
+    const byteMaxSize = 1000000;
+    const ratio = Math.min(maxWidthHeight / width, maxWidthHeight / height);
+    var buf: Buffer | undefined;
+    var currentWidth = width;
+    var currentHeight = height;
+    
+    if (width > maxWidthHeight || height > maxWidthHeight) internalResize(maxWidthHeight);
+    if ((buf = await img.toBuffer()).byteLength > byteMaxSize)
+    {
+        for (var x = 0.9; x < 0.1; x -= 0.1)
+        {
+            let max = Math.floor(maxWidthHeight * x);
+            internalResize(max);
+            if ((buf = await img.toBuffer()).byteLength <= byteMaxSize) break;
+        }
+    }
+
+    async function internalResize(max: number)
+    {
+        if (currentWidth > currentHeight)
+        {
+            widthResize();
+            heightResize();
+        }
+        else
+        {
+            heightResize();
+            widthResize();
+        }
+
+        var previousWidth;
+        var previousHeight;
+
+        async function widthResize()
+        {
+            if (currentWidth > max)
+            {
+                previousWidth = currentWidth;
+                previousHeight = currentHeight;
+                img.resize(currentWidth = max, currentHeight = Math.floor(height * ratio));
+                console.log(`Resized Image: ${Log.fg.yellow}${asset.sourceFilename}${Log.reset} from ${Log.fg.red}${previousWidth}x${previousHeight}${Log.reset}` +
+                    ` to ${Log.fg.green}${currentWidth}x${currentHeight} [${((await img.toBuffer()).byteLength / 1000).toLocaleString(undefined, { minimumFractionDigits: 3 })} KB]${Log.reset}.`);
+            }
+        }
+
+        async function heightResize()
+        {
+            if (currentHeight > max)
+            {
+                previousWidth = currentWidth;
+                previousHeight = currentHeight;
+                img.resize(currentWidth = Math.floor(width * ratio), currentHeight = max);
+                console.log(`Resized Image: ${Log.fg.yellow}${asset.sourceFilename}${Log.reset} from ${Log.fg.red}${previousWidth}x${previousHeight}${Log.reset}` +
+                    ` to ${Log.fg.green}${currentWidth}x${currentHeight} [${((await img.toBuffer()).byteLength / 1000).toLocaleString(undefined, { minimumFractionDigits: 3 })} KB]${Log.reset}.`);
+            }
+        }
+    }
+}
+
+async function transcode(asset: AssetInfo, img: sharp.Sharp, form: Format): Promise<Buffer | undefined>
+{
+    const byteMaxSize = 100000;
+    var buf: Buffer | undefined;
+    
+    for (var y = 0; y < (dev ? 6 : 12); y++)
+    {
+        var quality = 90 - y * (dev ? 10 : 4);
+        switch (form)
+        {
+            case Format.AVIF:
+                img.avif({ quality: quality, effort: dev ? 0 : 6 });
+                break;
+            case Format.WEBP:
+                img.webp({ quality: quality, effort: dev ? 0 : 6 });
+                break;
+        }
+        buf = await img.toBuffer();
+        console.log(`Transcoded Image: ${Log.fg.yellow}${asset.sourceFilename}${Log.reset}` +
+            ` to ${Log.fg.green}${form.toString()}${Log.reset} at quality ${Log.fg.green}${quality}% [${(buf.byteLength / 1000).toLocaleString(undefined, { minimumFractionDigits: 3 })} KB]${Log.reset}.`);
+        if (buf && buf.byteLength <= byteMaxSize) break;
+    }
+    if (buf && buf.byteLength <= byteMaxSize) return buf;
+    return buf;
 }
