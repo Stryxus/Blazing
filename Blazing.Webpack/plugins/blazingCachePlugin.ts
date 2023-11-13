@@ -15,8 +15,8 @@ export default class BlazingCachePlugin {
                         a.push(pathname.startsWith('/') ? pathname.substring(1) : pathname);
                     }
                 });
-                compilation.deleteAsset('bac.json');
-                compilation.emitAsset('bac.json', new sources.RawSource(JSON.stringify({a})));
+                compilation.deleteAsset('assets.json');
+                compilation.emitAsset('assets.json', new sources.RawSource(JSON.stringify({a})));
             });
         });
     }
