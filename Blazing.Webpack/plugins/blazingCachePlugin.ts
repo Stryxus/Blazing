@@ -23,7 +23,7 @@ export default class BlazingCachePlugin {
                     }
                 });
                 compilation.deleteAsset('assets.json');
-                compilation.emitAsset('assets.json', new sources.RawSource(JSON.stringify({a})));
+                compilation.emitAsset('assets.json', new sources.RawSource(JSON.stringify({files:a})));
             });
         });
     }
