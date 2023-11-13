@@ -25,30 +25,12 @@ process.argv.forEach((val, index, array) => {
 
 if (argEnv && argPath)
 {
-    /*
-    var backs;
-    var relativPath = argPath.substring(2 + (backs = (argPath.match('../') || []).length * 3) + 1);
-    for (var i = 0; i < backs; i++)
-    {
-        relativPath = `../${relativPath}`;
-    }
-    relativPath = `./${relativPath}`;
-    var wwwrootdevPath = path.resolve(argPath, 'wwwroot-dev');
-    var blazingAssetsPath: string | undefined = `${relativPath}/wwwroot-dev/blazing-assets`;
-
-    fs.truncate('./src/proxy.ts', 0, err =>
-    {
-        if (err) console.error(err);
-        fs.writeFile('./src/proxy.ts', `import(\'${blazingAssetsPath}\');`, err =>
-        {
-            if (err) console.error(err);
-        });
-    });
-    */
+    const wwwrootdevPath = path.resolve(argPath, 'wwwroot-dev');
+    const tsconfig: string = path.resolve(wwwrootdevPath, 'tsconfig.json');
     const config: webpack.Configuration = {
         mode: argEnv == 'dev' ? 'development' : 'production',
-        entry: path.resolve(argPath, 'wwwroot-dev', 'blazing-assets.js'),
-        context: path.resolve(argPath, 'wwwroot-dev'),
+        entry: path.resolve(wwwrootdevPath, 'blazing-assets.js'),
+        context: wwwrootdevPath,
         output: {
             path: path.resolve(argPath, 'wwwroot'),
             publicPath: '',
@@ -56,17 +38,6 @@ if (argEnv && argPath)
             globalObject: 'this',
             clean: true,
             asyncChunks: true,
-            environment: {
-                arrowFunction: true,
-                bigIntLiteral: true,
-                const: true,
-                destructuring: true,
-                dynamicImport: true,
-                forOf: true,
-                module: true,
-                optionalChaining: true,
-                templateLiteral: true,
-            },
             assetModuleFilename: (pathData: any) => {
                 let filepath = path.dirname(pathData.filename).split('/').slice(1).join('/');
                 filepath = filepath.includes('/') ? filepath.slice(12) : filepath.slice(11);
@@ -88,12 +59,7 @@ if (argEnv && argPath)
                             loader: require.resolve('postcss-loader'),
                             options: {
                                 postcssOptions: {
-                                    plugins: () =>
-                                    {
-                                        return [
-                                            require('autoprefixer')
-                                        ];
-                                    }
+                                    plugins: () => { return [ require('autoprefixer'), ]; }
                                 }
                             }
                         },
@@ -103,9 +69,7 @@ if (argEnv && argPath)
                 {
                     test: /\.ts$/i,
                     loader: require.resolve('ts-loader'),
-                    options: {
-                        configFile: path.resolve(argPath, 'wwwroot-dev', 'tsconfig.json'),
-                    },
+                    options: { configFile: tsconfig, },
                 },
                 {
                     test: /\.(png|json|mp4|aac|svg)$/i,
@@ -114,19 +78,13 @@ if (argEnv && argPath)
                 {
                     test: /\.woff2?$/,
                     type: 'asset',
-                    generator: {
-                        filename: './fonts/[name].[contenthash][ext]',
-                    },
+                    generator: { filename: './fonts/[name].[contenthash][ext]', },
                 },
             ],
         },
         plugins: [
-            new HtmlWebpackPlugin.default({
-                template: path.resolve(argPath, 'wwwroot-dev', 'index.html'),
-            }),
-            new MiniCssExtractPlugin.default({
-                filename: './[name].[contenthash].css',
-            }),
+            new HtmlWebpackPlugin.default({ template: path.resolve(wwwrootdevPath, 'index.html'), }),
+            new MiniCssExtractPlugin.default({ filename: './[name].[contenthash].css', }),
             new ESLintPlugin.default(),
             {
                 apply: (compiler: webpack.Compiler) => {
@@ -143,9 +101,7 @@ if (argEnv && argPath)
             new BlazingCachePlugin(),
         ],
         resolveLoader: {
-            plugins: [
-                new TsconfigPathsPlugin({ configFile: path.resolve(argPath, 'wwwroot-dev', 'tsconfig.json'), })
-            ]
+            plugins: [ new TsconfigPathsPlugin({ configFile: tsconfig, }), ]
         },
         optimization: {
             splitChunks: {
@@ -159,9 +115,7 @@ if (argEnv && argPath)
                 }),
             ],
         },
-        performance: {
-            hints: argEnv === 'prod' ? 'warning' : false
-        },
+        performance: { hints: argEnv === 'prod' ? 'warning' : false },
         resolve: {
             extensions: ['.ts']
         },
@@ -180,12 +134,8 @@ if (argEnv && argPath)
         }
     });
 
-    if (argEnv === 'prod')
-    {
-        watch.close((err: any, stats: any) =>
-        {
-            if (err) console.error(err);
-        });
+    if (argEnv === 'prod') {
+        watch.close((err: any, stats: any) => { if (err) console.error(err); });
     }
 } else {
     console.error('Either or both of --env and --path were not declared!');
