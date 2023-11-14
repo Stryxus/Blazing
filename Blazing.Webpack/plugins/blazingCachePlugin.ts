@@ -1,7 +1,5 @@
 import webpack from 'webpack';
 
-import { Log } from '../utils';
-
 export default class BlazingCachePlugin {
     apply(compiler: webpack.Compiler) {
         compiler.hooks.compilation.tap('BlazingCachePlugin', compilation =>
@@ -9,7 +7,8 @@ export default class BlazingCachePlugin {
             compilation.hooks.afterProcessAssets.tap({
                 name: 'BlazingCachePlugin',
                 stage: webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
-            }, assets => {
+            }, assets =>
+            {
                 const sources = compilation.compiler.webpack.sources;
 
                 var a: any = [];
@@ -46,7 +45,6 @@ export default class BlazingCachePlugin {
                         console.log(`Added ${pn} to assets.json.`);
                     }
                 }
-
                 compilation.deleteAsset('assets.json');
                 compilation.emitAsset('assets.json', new sources.RawSource(JSON.stringify({files:a})));
             });

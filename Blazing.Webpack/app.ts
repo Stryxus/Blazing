@@ -8,6 +8,7 @@ import * as ESLintPlugin from 'eslint-webpack-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 
+import BlazingMinificationPlugin from './plugins/blazingMinificationPlugin';
 import BlazingMediaMinificationPlugin from './plugins/blazingMediaMinificationPlugin';
 import BlazingCachePlugin from './plugins/blazingCachePlugin';
 
@@ -102,6 +103,7 @@ if (argEnv && argPath)
                     }
                 }
             },
+            new BlazingMinificationPlugin(),
             new BlazingMediaMinificationPlugin(),
             new BlazingCachePlugin(),
         ],
