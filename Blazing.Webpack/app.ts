@@ -34,14 +34,14 @@ if (argEnv && argPath)
         output: {
             path: path.resolve(argPath, 'wwwroot'),
             publicPath: '',
-            filename: '[name].[contenthash].js',
+            filename: '0.js',
             globalObject: 'this',
             clean: true,
             asyncChunks: true,
             assetModuleFilename: (pathData: any) => {
                 let filepath = path.dirname(pathData.filename).split('/').slice(1).join('/');
                 filepath = filepath.includes('/') ? filepath.slice(12) : filepath.slice(11);
-                return `${filepath}/[name].[contenthash][ext]`;
+                return `${filepath}/[name][ext]`;
             },
         },
         stats: {
@@ -53,16 +53,26 @@ if (argEnv && argPath)
                 {
                     test: /\.sass$/i,
                     use: [
-                        { loader: require.resolve('style-loader'), },
+                        MiniCssExtractPlugin.loader,
                         { loader: require.resolve('css-loader'), options: { sourceMap: argEnv === 'dev' } },
                         {
                             loader: require.resolve('postcss-loader'),
                             options: {
+                                sourceMap: argEnv === 'dev',
                                 postcssOptions: {
-                                    plugins: () => { return [ require('autoprefixer'), ]; }
+                                    plugins: () =>
+                                    [
+                                        'autoprefixer',
+                                        {},
+                                        'postcss-base64',
+                                        {},
+                                        'postcss-font-base64',
+                                        {},
+                                    ],
                                 }
                             }
                         },
+                        { loader: require.resolve('resolve-url-loader'), options: { } },
                         { loader: require.resolve('sass-loader'), options: { sourceMap: argEnv === 'dev' } },
                     ],
                 },
@@ -72,19 +82,14 @@ if (argEnv && argPath)
                     options: { configFile: tsconfig, },
                 },
                 {
-                    test: /\.(png|json|mp4|aac|svg)$/i,
-                    type: 'asset',
-                },
-                {
-                    test: /\.woff2?$/,
-                    type: 'asset',
-                    generator: { filename: './fonts/[name].[contenthash][ext]', },
+                    test: /\.(png|json|mp4|aac|svg|woff|woff2)$/i,
+                    type: 'asset/resource',
                 },
             ],
         },
         plugins: [
             new HtmlWebpackPlugin.default({ template: path.resolve(wwwrootdevPath, 'index.html'), }),
-            new MiniCssExtractPlugin.default({ filename: './[name].[contenthash].css', }),
+            new MiniCssExtractPlugin.default({ filename: '0.css' }),
             new ESLintPlugin.default(),
             {
                 apply: (compiler: webpack.Compiler) => {

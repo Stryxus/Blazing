@@ -16,16 +16,13 @@ export default class BlazingMediaMinificationPlugin {
         {
             compilation.hooks.optimizeAssets.tapPromise({
                 name: 'BlazingMediaMinificationPlugin',
-                stage: webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
+                stage: webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
             }, async assets =>
             {
                 const sources = compilation.compiler.webpack.sources;
-                console.log(`${Log.fg.green}Starting Media Transcoding and Optimisation Stage...${Log.reset}`);
-
                 for (const [pathname, source] of Object.entries(assets))
                 {
                     const assetInfo: AssetInfo | undefined = compilation.assetsInfo.get(pathname);
-
                     if (assetInfo && assetInfo.sourceFilename && pathname.endsWith('.png') && assetInfo.sourceFilename.startsWith('img/'))
                     {
                         const imgSize: ISizeCalculationResult = sizeOf(source.buffer());
@@ -37,7 +34,6 @@ export default class BlazingMediaMinificationPlugin {
                             hash.end();
 
                             const sha1 = hash.read();
-                            if (caches.length >= 100000) caches = [];
                             if (!caches.includes(sha1)) {
                                 caches.push(sha1);
 
@@ -139,7 +135,7 @@ async function transcode(asset: AssetInfo, img: sharp.Sharp, form: Format): Prom
     const byteMaxSize = 100000;
     var buf: Buffer | undefined;
     
-    for (var y = 0; y < (dev ? 6 : 12); y++)
+    for (var y = 0; y < (dev ? 3 : 12); y++)
     {
         var quality = 90 - y * (dev ? 10 : 4);
         switch (form)
