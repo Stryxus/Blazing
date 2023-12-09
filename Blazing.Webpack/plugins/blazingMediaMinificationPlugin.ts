@@ -1,14 +1,14 @@
 import crypto from 'crypto';
 
 import webpack, { AssetInfo } from 'webpack';
-import sharp from 'sharp';
+import sharp, { cache } from 'sharp';
 import sizeOf from 'image-size';
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 
 import { Log } from '../utils';
 
 const dev = process.env.NODE_ENV !== 'production';
-var caches: string[] = [];
+var caches: Map<string, Buffer[]> = new Map<string, Buffer[]>();
 
 export default class BlazingMediaMinificationPlugin {
     apply(compiler: webpack.Compiler) {
@@ -26,30 +26,24 @@ export default class BlazingMediaMinificationPlugin {
                     if (assetInfo && assetInfo.sourceFilename && pathname.endsWith('.png') && assetInfo.sourceFilename.startsWith('img/'))
                     {
                         const imgSize: ISizeCalculationResult = sizeOf(source.buffer());
-
                         if (imgSize && imgSize.width && imgSize.height) {
-                            const hash = crypto.createHash('sha1');
-                            hash.setEncoding('hex');
-                            hash.write(source.buffer());
-                            hash.end();
 
-                            const sha1 = hash.read();
-                            if (!caches.includes(sha1)) {
-                                caches.push(sha1);
+                            var avif: Buffer | undefined;
+                            var webp: Buffer | undefined;
+                            const img = sharp(source.buffer());
 
-                                var avif: Buffer | undefined;
-                                var webp: Buffer | undefined;
-                                const img = sharp(source.buffer());
+                            await resize(assetInfo, img, imgSize.width, imgSize.height);
+                            avif = await transcode(assetInfo, img, Format.AVIF);
+                            webp = await transcode(assetInfo, img, Format.WEBP);
 
-                                await resize(assetInfo, img, imgSize.width, imgSize.height);
-                                avif = await transcode(assetInfo, img, Format.AVIF);
-                                webp = await transcode(assetInfo, img, Format.WEBP);
-
-                                if (avif && webp) // This should never fail but it makes the analyser happy.
-                                {
-                                    compilation.deleteAsset(pathname);
-                                    compilation.emitAsset(pathname.replace('.png', '.avif'), new sources.RawSource(avif));
-                                    compilation.emitAsset(pathname.replace('.png', '.webp'), new sources.RawSource(webp));
+                            if (avif && webp) // This should never fail but it makes the analyser happy.
+                            {
+                                if (caches.has(pathname)) caches.delete(pathname);
+                                caches.set(pathname, [avif, webp]);
+                                for (const [key, val] of caches) {
+                                    compilation.deleteAsset(key);
+                                    compilation.emitAsset(key.replace('.png', '.avif'), new sources.RawSource(val[0]));
+                                    compilation.emitAsset(key.replace('.png', '.webp'), new sources.RawSource(val[1]));
                                 }
                             }
                         } else {

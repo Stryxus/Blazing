@@ -35,7 +35,6 @@ export default class BlazingCachePlugin {
                                 var webp = [nextEnt.replace('.avif', '.webp'), newpathname.toString()];
                                 compilation.renameAsset(`/${nextEnt.replace('.avif', '.webp')}`, `${newpathname}${pathname.substring(pathname.lastIndexOf('.')).replace('.avif', '.webp')}`);
                                 a.push(webp);
-                                console.log(`Added ${webp} to assets.json.`);
                                 x++;
                             }
                         }
