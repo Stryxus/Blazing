@@ -42,11 +42,11 @@ export default class BlazingCachePlugin {
                         else pn = [pathname, newpathname.toString()];
 
                         a.push(pn);
-                        console.log(`Added ${pn} to assets.json.`);
                     }
                 }
                 compilation.deleteAsset('assets.json');
-                compilation.emitAsset('assets.json', new sources.RawSource(JSON.stringify({files:a})));
+                compilation.emitAsset('assets.json', new sources.RawSource(JSON.stringify({ files: a })));
+                console.log(`Updated caches in assets.json.`);
             });
         });
     }
