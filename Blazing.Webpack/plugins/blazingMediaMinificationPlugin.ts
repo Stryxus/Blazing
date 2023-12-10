@@ -1,4 +1,5 @@
 import fs from 'fs';
+import path from 'path';
 
 import webpack, { AssetInfo } from 'webpack';
 import sharp from 'sharp';
@@ -22,6 +23,7 @@ export default class BlazingMediaMinificationPlugin
             }, async assets =>
             {
                 const sources = compilation.compiler.webpack.sources;
+                const context = compilation.options.context;
                 for (const [pathname, source] of Object.entries(assets))
                 {
                     const assetInfo: AssetInfo | undefined = compilation.assetsInfo.get(pathname);
@@ -40,14 +42,15 @@ export default class BlazingMediaMinificationPlugin
 
                             if (avif && webp) // This should never fail but it makes the analyser happy.
                             {
-                                caches.set(pathname, [avif, webp]);
+                                caches.set(assetInfo.sourceFilename, [avif, webp]);
                                 for (const [key, val] of caches)
                                 {
-                                    if (fs.existsSync(key))
+                                    if (fs.existsSync(path.join(context as string, key)))
                                     {
-                                        compilation.deleteAsset(key);
-                                        compilation.emitAsset(key.replace('.png', '.avif'), new sources.RawSource(val[0]));
-                                        compilation.emitAsset(key.replace('.png', '.webp'), new sources.RawSource(val[1]));
+                                        const relativeKey = key.substring(key.lastIndexOf('/'));
+                                        compilation.deleteAsset(relativeKey);
+                                        compilation.emitAsset(relativeKey.replace('.png', '.avif'), new sources.RawSource(val[0]));
+                                        compilation.emitAsset(relativeKey.replace('.png', '.webp'), new sources.RawSource(val[1]));
                                     }
                                     else caches.delete(key);
                                 }

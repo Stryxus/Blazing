@@ -39,7 +39,6 @@ export default class BlazingCachePlugin {
                             }
                         }
                         else pn = [pathname, newpathname.toString()];
-
                         a.push(pn);
                     }
                 }
