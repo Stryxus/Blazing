@@ -17,9 +17,10 @@ export default class BlazingMediaMinificationPlugin
     {
         compiler.hooks.compilation.tap('BlazingMediaMinificationPlugin', compilation =>
         {
-            compilation.hooks.optimizeAssets.tapPromise({
+            compilation.hooks.processAssets.tapPromise({
                 name: 'BlazingMediaMinificationPlugin',
-                stage: webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
+                stage: webpack.Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_SIZE,
+                additionalAssets: true,
             }, async assets =>
             {
                 const sources = compilation.compiler.webpack.sources;
@@ -48,7 +49,6 @@ export default class BlazingMediaMinificationPlugin
                                     if (fs.existsSync(path.join(context as string, key)))
                                     {
                                         const relativeKey = key.substring(key.lastIndexOf('/'));
-                                        compilation.deleteAsset(relativeKey);
                                         compilation.emitAsset(relativeKey.replace('.png', '.avif'), new sources.RawSource(val[0]));
                                         compilation.emitAsset(relativeKey.replace('.png', '.webp'), new sources.RawSource(val[1]));
                                     }

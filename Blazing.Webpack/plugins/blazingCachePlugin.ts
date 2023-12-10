@@ -6,7 +6,7 @@ export default class BlazingCachePlugin {
         {
             compilation.hooks.afterProcessAssets.tap({
                 name: 'BlazingCachePlugin',
-                stage: webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
+                stage: webpack.Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_SIZE,
             }, assets =>
             {
                 const sources = compilation.compiler.webpack.sources;
@@ -18,7 +18,11 @@ export default class BlazingCachePlugin {
                 {
                     // This all needs to be replaced by mime types in future.
                     var pathname = ents[x][0];
-                    if (pathname !== 'assets.json' && !pathname.endsWith('.html') && !pathname.endsWith('.js') && !pathname.endsWith('.css'))
+                    if (pathname !== 'assets.json' &&
+                        !pathname.endsWith('.html') &&
+                        !pathname.endsWith('.js') &&
+                        !pathname.endsWith('.css') &&
+                        (!pathname.includes('/img') && !pathname.endsWith('.png')))
                     {
                         var newpathname = currentObfuscationNumber++;
                         compilation.renameAsset(pathname, `${newpathname}${pathname.substring(pathname.lastIndexOf('.'))}`);

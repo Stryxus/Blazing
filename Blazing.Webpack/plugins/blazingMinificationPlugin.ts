@@ -9,9 +9,10 @@ export default class BlazingMinificationPlugin
     {
         compiler.hooks.compilation.tap('BlazingMinificationPlugin', compilation =>
         {
-            compilation.hooks.optimizeAssets.tapPromise({
+            compilation.hooks.processAssets.tapPromise({
                 name: 'BlazingMinificationPlugin',
-                stage: webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
+                stage: webpack.Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_SIZE,
+                additionalAssets: true,
             }, async assets =>
             {
                 const sources = compilation.compiler.webpack.sources;
