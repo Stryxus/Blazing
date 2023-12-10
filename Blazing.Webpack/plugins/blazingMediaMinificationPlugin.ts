@@ -1,7 +1,7 @@
-import crypto from 'crypto';
+import fs from 'fs';
 
 import webpack, { AssetInfo } from 'webpack';
-import sharp, { cache } from 'sharp';
+import sharp from 'sharp';
 import sizeOf from 'image-size';
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 
@@ -38,12 +38,16 @@ export default class BlazingMediaMinificationPlugin {
 
                             if (avif && webp) // This should never fail but it makes the analyser happy.
                             {
-                                if (caches.has(pathname)) caches.delete(pathname);
                                 caches.set(pathname, [avif, webp]);
-                                for (const [key, val] of caches) {
-                                    compilation.deleteAsset(key);
-                                    compilation.emitAsset(key.replace('.png', '.avif'), new sources.RawSource(val[0]));
-                                    compilation.emitAsset(key.replace('.png', '.webp'), new sources.RawSource(val[1]));
+                                for (const [key, val] of caches)
+                                {
+                                    if (fs.existsSync(key))
+                                    {
+                                        compilation.deleteAsset(key);
+                                        compilation.emitAsset(key.replace('.png', '.avif'), new sources.RawSource(val[0]));
+                                        compilation.emitAsset(key.replace('.png', '.webp'), new sources.RawSource(val[1]));
+                                    }
+                                    else caches.delete(key);
                                 }
                             }
                         } else {
