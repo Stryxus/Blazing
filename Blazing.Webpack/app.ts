@@ -67,8 +67,6 @@ if (argEnv && argPath)
                                         {},
                                         'postcss-base64',
                                         {},
-                                        'postcss-font-base64',
-                                        {},
                                     ],
                                 }
                             }
