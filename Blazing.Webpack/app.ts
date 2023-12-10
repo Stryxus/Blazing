@@ -65,8 +65,6 @@ if (argEnv && argPath)
                                     [
                                         'autoprefixer',
                                         {},
-                                        'postcss-base64',
-                                        {},
                                     ],
                                 }
                             }
