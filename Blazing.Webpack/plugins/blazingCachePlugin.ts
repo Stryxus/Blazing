@@ -22,6 +22,7 @@ export default class BlazingCachePlugin {
                         !pathname.endsWith('.html') &&
                         !pathname.endsWith('.js') &&
                         !pathname.endsWith('.css') &&
+                        !pathname.endsWith('.woff2') &&
                         (!pathname.includes('/img') && !pathname.endsWith('.png')))
                     {
                         var newpathname = currentObfuscationNumber++;

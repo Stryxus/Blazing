@@ -1,7 +1,6 @@
-import fs from 'fs/promises';
-import path from 'path';
 
-import webpack from 'webpack';
+
+import webpack, { AssetInfo } from 'webpack';
 
 export default class BlazingMinificationPlugin
 {
@@ -16,7 +15,17 @@ export default class BlazingMinificationPlugin
             }, async assets =>
             {
                 const sources = compilation.compiler.webpack.sources;
-                
+                const context = compilation.options.context;
+                for (const [pathname, source] of Object.entries(assets))
+                {
+                    const assetInfo: AssetInfo | undefined = compilation.assetsInfo.get(pathname);
+                    if (assetInfo && assetInfo.sourceFilename)
+                    {
+
+                    }
+                }
+
+                /*
                 var ents = Object.entries(assets);
                 for (var x = 0; x < ents.length; x++)
                 {
@@ -58,6 +67,7 @@ export default class BlazingMinificationPlugin
                         compilation.emitAsset('0.css', new sources.RawSource(newcss));
                     }
                 }
+                */
             });
         });
     }

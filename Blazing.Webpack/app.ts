@@ -79,8 +79,8 @@ if (argEnv && argPath)
                     options: { configFile: tsconfig, },
                 },
                 {
-                    test: /\.(png|json|mp4|aac|svg|woff|woff2)$/i,
-                    type: 'asset/resource',
+                    test: /\.(png|json|mp4|aac|svg|woff2)$/i,
+                    type: 'asset',
                 },
             ],
         },
