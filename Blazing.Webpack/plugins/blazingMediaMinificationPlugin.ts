@@ -54,22 +54,23 @@ export default class BlazingMediaMinificationPlugin
                                 if (avif && webp) // This should never fail but it makes the analyser happy.
                                 {
                                     processedCaches.set(assetInfo.sourceFilename, [avif, webp]);
-                                    for (const [key, val] of processedCaches)
-                                    {
-                                        if (fs.existsSync(path.join(context as string, key)))
-                                        {
-                                            const relativeKey = key.substring(key.lastIndexOf('/'));
-                                            compilation.emitAsset(relativeKey.replace('.png', '.avif'), new sources.RawSource(val[0]));
-                                            compilation.emitAsset(relativeKey.replace('.png', '.webp'), new sources.RawSource(val[1]));
-                                        }
-                                        else processedCaches.delete(key);
-                                    }
                                     hashCaches.push(sha1);
                                 }
                             }
                             else console.error('For some reason, the image\'s width and height could not be retreived!');
                         }
                     }
+                }
+
+                for (const [key, val] of processedCaches)
+                {
+                    if (fs.existsSync(path.join(context as string, key)))
+                    {
+                        const relativeKey = key.substring(key.lastIndexOf('/'));
+                        compilation.emitAsset(relativeKey.replace('.png', '.avif'), new sources.RawSource(val[0]));
+                        compilation.emitAsset(relativeKey.replace('.png', '.webp'), new sources.RawSource(val[1]));
+                    }
+                    else processedCaches.delete(key);
                 }
             });
         });
