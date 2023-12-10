@@ -10,8 +10,10 @@ import { Log } from '../utils';
 const dev = process.env.NODE_ENV !== 'production';
 var caches: Map<string, Buffer[]> = new Map<string, Buffer[]>();
 
-export default class BlazingMediaMinificationPlugin {
-    apply(compiler: webpack.Compiler) {
+export default class BlazingMediaMinificationPlugin
+{
+    apply(compiler: webpack.Compiler) 
+    {
         compiler.hooks.compilation.tap('BlazingMediaMinificationPlugin', compilation =>
         {
             compilation.hooks.optimizeAssets.tapPromise({
@@ -26,8 +28,8 @@ export default class BlazingMediaMinificationPlugin {
                     if (assetInfo && assetInfo.sourceFilename && pathname.endsWith('.png') && assetInfo.sourceFilename.startsWith('img/'))
                     {
                         const imgSize: ISizeCalculationResult = sizeOf(source.buffer());
-                        if (imgSize && imgSize.width && imgSize.height) {
-
+                        if (imgSize && imgSize.width && imgSize.height) 
+                        {
                             var avif: Buffer | undefined;
                             var webp: Buffer | undefined;
                             const img = sharp(source.buffer());
@@ -50,9 +52,8 @@ export default class BlazingMediaMinificationPlugin {
                                     else caches.delete(key);
                                 }
                             }
-                        } else {
-                            console.error('For some reason, the image\'s width and height could not be retreived!');
                         }
+                        else console.error('For some reason, the image\'s width and height could not be retreived!');
                     }
                 }
             });
