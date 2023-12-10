@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 
 import webpack, { AssetInfo } from 'webpack';
 import sharp from 'sharp';
@@ -9,7 +10,8 @@ import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 import { Log } from '../utils';
 
 const dev = process.env.NODE_ENV !== 'production';
-var caches: Map<string, Buffer[]> = new Map<string, Buffer[]>();
+var hashCaches: string[] = [];
+var processedCaches: Map<string, Buffer[]> = new Map<string, Buffer[]>();
 
 export default class BlazingMediaMinificationPlugin
 {
@@ -30,33 +32,43 @@ export default class BlazingMediaMinificationPlugin
                     const assetInfo: AssetInfo | undefined = compilation.assetsInfo.get(pathname);
                     if (assetInfo && assetInfo.sourceFilename && pathname.endsWith('.png') && assetInfo.sourceFilename.startsWith('img/'))
                     {
-                        const imgSize: ISizeCalculationResult = sizeOf(source.buffer());
-                        if (imgSize && imgSize.width && imgSize.height) 
+                        const hash = crypto.createHash('sha1');
+                        hash.setEncoding('hex');
+                        hash.write(source.buffer());
+                        hash.end();
+
+                        const sha1 = hash.read();
+                        if (!hashCaches.includes(sha1))
                         {
-                            var avif: Buffer | undefined;
-                            var webp: Buffer | undefined;
-                            const img = sharp(source.buffer());
-
-                            await resize(assetInfo, img, imgSize.width, imgSize.height);
-                            avif = await transcode(assetInfo, img, Format.AVIF);
-                            webp = await transcode(assetInfo, img, Format.WEBP);
-
-                            if (avif && webp) // This should never fail but it makes the analyser happy.
+                            const imgSize: ISizeCalculationResult = sizeOf(source.buffer());
+                            if (imgSize && imgSize.width && imgSize.height) 
                             {
-                                caches.set(assetInfo.sourceFilename, [avif, webp]);
-                                for (const [key, val] of caches)
+                                var avif: Buffer | undefined;
+                                var webp: Buffer | undefined;
+                                const img = sharp(source.buffer());
+
+                                await resize(assetInfo, img, imgSize.width, imgSize.height);
+                                avif = await transcode(assetInfo, img, Format.AVIF);
+                                webp = await transcode(assetInfo, img, Format.WEBP);
+
+                                if (avif && webp) // This should never fail but it makes the analyser happy.
                                 {
-                                    if (fs.existsSync(path.join(context as string, key)))
+                                    processedCaches.set(assetInfo.sourceFilename, [avif, webp]);
+                                    for (const [key, val] of processedCaches)
                                     {
-                                        const relativeKey = key.substring(key.lastIndexOf('/'));
-                                        compilation.emitAsset(relativeKey.replace('.png', '.avif'), new sources.RawSource(val[0]));
-                                        compilation.emitAsset(relativeKey.replace('.png', '.webp'), new sources.RawSource(val[1]));
+                                        if (fs.existsSync(path.join(context as string, key)))
+                                        {
+                                            const relativeKey = key.substring(key.lastIndexOf('/'));
+                                            compilation.emitAsset(relativeKey.replace('.png', '.avif'), new sources.RawSource(val[0]));
+                                            compilation.emitAsset(relativeKey.replace('.png', '.webp'), new sources.RawSource(val[1]));
+                                        }
+                                        else processedCaches.delete(key);
                                     }
-                                    else caches.delete(key);
+                                    hashCaches.push(sha1);
                                 }
                             }
+                            else console.error('For some reason, the image\'s width and height could not be retreived!');
                         }
-                        else console.error('For some reason, the image\'s width and height could not be retreived!');
                     }
                 }
             });
