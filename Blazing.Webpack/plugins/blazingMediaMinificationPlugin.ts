@@ -10,8 +10,7 @@ import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 import { Log } from '../utils';
 
 const dev = process.env.NODE_ENV !== 'production';
-var hashCaches: string[] = [];
-var processedCaches: Map<string, Buffer[]> = new Map<string, Buffer[]>();
+var caches: Map<string, any[]> = new Map<string, any[]>();
 
 export default class BlazingMediaMinificationPlugin
 {
@@ -38,7 +37,7 @@ export default class BlazingMediaMinificationPlugin
                         hash.end();
 
                         const sha1 = hash.read();
-                        if (!hashCaches.includes(sha1))
+                        if (!caches.has(sha1))
                         {
                             const imgSize: ISizeCalculationResult = sizeOf(source.buffer());
                             if (imgSize && imgSize.width && imgSize.height) 
@@ -46,31 +45,26 @@ export default class BlazingMediaMinificationPlugin
                                 var avif: Buffer | undefined;
                                 var webp: Buffer | undefined;
                                 const img = sharp(source.buffer());
-
                                 await resize(assetInfo, img, imgSize.width, imgSize.height);
                                 avif = await transcode(assetInfo, img, Format.AVIF);
                                 webp = await transcode(assetInfo, img, Format.WEBP);
-
-                                if (avif && webp) // This should never fail but it makes the analyser happy.
-                                {
-                                    processedCaches.set(assetInfo.sourceFilename, [avif, webp]);
-                                    hashCaches.push(sha1);
-                                }
+                                caches.set(sha1, [assetInfo.sourceFilename, avif, webp]);
                             }
                             else console.error('For some reason, the image\'s width and height could not be retreived!');
                         }
                     }
                 }
 
-                for (const [key, val] of processedCaches)
+                for (const [key, val] of caches)
                 {
-                    if (fs.existsSync(path.join(context as string, key)))
+                    if (fs.existsSync(path.join(context as string, val[0])))
                     {
-                        const relativeKey = key.substring(key.lastIndexOf('/'));
-                        compilation.emitAsset(relativeKey.replace('.png', '.avif'), new sources.RawSource(val[0]));
-                        compilation.emitAsset(relativeKey.replace('.png', '.webp'), new sources.RawSource(val[1]));
+                        const relativeKey = val[0].substring(val[0].lastIndexOf('/'));
+                        compilation.deleteAsset(relativeKey);
+                        compilation.emitAsset(relativeKey.replace('.png', '.avif'), new sources.RawSource(val[1]));
+                        compilation.emitAsset(relativeKey.replace('.png', '.webp'), new sources.RawSource(val[2]));
                     }
-                    else processedCaches.delete(key);
+                    else caches.delete(key);
                 }
             });
         });
