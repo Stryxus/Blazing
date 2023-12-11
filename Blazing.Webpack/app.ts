@@ -26,6 +26,8 @@ process.argv.forEach((val, index, array) => {
 
 if (argEnv && argPath)
 {
+    process.stdout.write(`${String.fromCharCode(27)}]0;Blazing${String.fromCharCode(7)}`);
+
     const wwwrootdevPath = path.resolve(argPath, 'wwwroot-dev');
     const tsconfig: string = path.resolve(wwwrootdevPath, 'tsconfig.json');
     const config: webpack.Configuration = {
