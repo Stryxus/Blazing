@@ -109,9 +109,6 @@ if (argEnv && argPath)
             plugins: [ new TsconfigPathsPlugin({ configFile: tsconfig, }), ]
         },
         optimization: {
-            splitChunks: {
-                maxSize: 100000,
-            },
             minimize: true,
             minimizer: [
                 '...',
