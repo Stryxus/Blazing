@@ -9,7 +9,7 @@ import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 
 import { Log } from '../utils';
 
-const dev = process.env.NODE_ENV !== 'production';
+const dev = process.env.NODE_ENV == 'dev';
 var caches: Map<string, any[]> = new Map<string, any[]>();
 
 export default class BlazingMediaMinificationPlugin

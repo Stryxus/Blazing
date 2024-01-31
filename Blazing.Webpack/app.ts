@@ -12,26 +12,26 @@ import BlazingMinificationPlugin from './plugins/blazingMinificationPlugin';
 import BlazingMediaMinificationPlugin from './plugins/blazingMediaMinificationPlugin';
 import BlazingCachePlugin from './plugins/blazingCachePlugin';
 
-var argEnv: string | undefined;
+var isDev: boolean | undefined;
 var argPath: string | undefined;
 
 process.argv.forEach((val, index, array) => {
     if (val === '--env') {
-        argEnv = array[index + 1];
+        isDev = (process.env.NODE_ENV = array[index + 1]) == 'dev';
     }
     if (val === '--path') {
         argPath = array[index + 1];
     }
 });
 
-if (argEnv && argPath)
+if (argPath)
 {
     process.stdout.write(`${String.fromCharCode(27)}]0;Blazing${String.fromCharCode(7)}`);
 
     const wwwrootdevPath = path.resolve(argPath, 'wwwroot-dev');
     const tsconfig: string = path.resolve(wwwrootdevPath, 'tsconfig.json');
     const config: webpack.Configuration = {
-        mode: argEnv == 'dev' ? 'development' : 'production',
+        mode: isDev ? 'development' : 'production',
         entry: path.resolve(wwwrootdevPath, 'blazing-assets.js'),
         context: wwwrootdevPath,
         output: {
@@ -48,8 +48,8 @@ if (argEnv && argPath)
             },
         },
         stats: {
-            children: argEnv === 'dev',
-            errorDetails: argEnv === 'dev',
+            children: isDev,
+            errorDetails: isDev,
         },
         module: {
             rules: [
@@ -92,7 +92,7 @@ if (argEnv && argPath)
             new ESLintPlugin.default(),
             {
                 apply: (compiler: webpack.Compiler) => {
-                    if (argEnv === 'prod') {
+                    if (!isDev) {
                         compiler.hooks.done.tap('DonePlugin', () => {
                             setTimeout(() => {
                                 process.exit(0)
@@ -117,7 +117,7 @@ if (argEnv && argPath)
                 }),
             ],
         },
-        performance: { hints: argEnv === 'prod' ? 'warning' : false },
+        performance: { hints: !isDev ? 'warning' : false },
         resolve: {
             extensions: ['.ts']
         },
@@ -136,7 +136,7 @@ if (argEnv && argPath)
         }
     });
 
-    if (argEnv === 'prod') {
+    if (!isDev) {
         watch.close((err: any, stats: any) => { if (err) console.error(err); });
     }
 } else {
