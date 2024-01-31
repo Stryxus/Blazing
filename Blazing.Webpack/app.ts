@@ -57,11 +57,11 @@ if (argEnv && argPath)
                     test: /\.sass$/i,
                     use: [
                         MiniCssExtractPlugin.loader,
-                        { loader: require.resolve('css-loader'), options: { sourceMap: argEnv === 'dev' } },
+                        { loader: require.resolve('css-loader'), options: { sourceMap: true} },
                         {
                             loader: require.resolve('postcss-loader'),
                             options: {
-                                sourceMap: argEnv === 'dev',
+                                sourceMap: true,
                                 postcssOptions: {
                                     plugins: () =>
                                     [
@@ -72,7 +72,7 @@ if (argEnv && argPath)
                             }
                         },
                         { loader: require.resolve('resolve-url-loader'), options: { } },
-                        { loader: require.resolve('sass-loader'), options: { sourceMap: argEnv === 'dev' } },
+                        { loader: require.resolve('sass-loader'), options: { sourceMap: true } },
                     ],
                 },
                 {
