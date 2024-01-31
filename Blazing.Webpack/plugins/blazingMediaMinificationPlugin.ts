@@ -144,7 +144,7 @@ async function transcode(asset: AssetInfo, img: sharp.Sharp, form: Format): Prom
     const byteMaxSize = 100000;
     var buf: Buffer | undefined;
     
-    for (var y = 0; y < (dev ? 3 : 12); y++)
+    for (var y = 0; y < (dev ? 3 : 18); y++)
     {
         var quality = 90 - y * (dev ? 10 : 4);
         switch (form)
