@@ -139,14 +139,16 @@ async function resize(asset: AssetInfo, img: sharp.Sharp, width: number, height:
     }
 }
 
+var carryQuality: number | undefined;
 async function transcode(asset: AssetInfo, img: sharp.Sharp, form: Format): Promise<Buffer | undefined>
 {
     const byteMaxSize = 100000;
     var buf: Buffer | undefined;
-    
+    var quality: number | undefined;
+
     for (var y = 0; y < (dev ? 3 : 18); y++)
     {
-        var quality = 90 - y * (dev ? 10 : 4);
+        quality = (carryQuality && Format.WEBP ? carryQuality : 96) - y * (dev ? 10 : 4);
         switch (form)
         {
             case Format.AVIF:
@@ -161,6 +163,8 @@ async function transcode(asset: AssetInfo, img: sharp.Sharp, form: Format): Prom
             ` to ${Log.fg.green}${form.toString()}${Log.reset} at quality ${Log.fg.green}${quality}% [${(buf.byteLength / 1000).toLocaleString(undefined, { minimumFractionDigits: 3 })} KB]${Log.reset}.`);
         if (buf && buf.byteLength <= byteMaxSize) break;
     }
+    if (form == Format.AVIF) carryQuality = quality;
+    else if (form == Format.WEBP) carryQuality = undefined;
     if (buf && buf.byteLength <= byteMaxSize) return buf;
     return buf;
 }
