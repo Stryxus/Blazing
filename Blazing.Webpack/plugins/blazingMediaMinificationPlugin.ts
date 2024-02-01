@@ -70,7 +70,7 @@ export default class BlazingMediaMinificationPlugin
 
 async function resize(asset: AssetInfo, img: sharp.Sharp, width: number, height: number)
 {
-    const maxWidthHeight = 3840;
+    const maxWidthHeight = 1440;
     const byteMaxSize = 1000000;
     const ratio = Math.min(maxWidthHeight / width, maxWidthHeight / height);
     var buf: Buffer | undefined;
