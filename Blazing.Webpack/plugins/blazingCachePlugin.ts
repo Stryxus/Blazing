@@ -29,21 +29,7 @@ export default class BlazingCachePlugin {
                         compilation.renameAsset(pathname, `${newpathname}${pathname.substring(pathname.lastIndexOf('.'))}`);
 
                         pathname = pathname.startsWith('/') ? pathname.substring(1) : pathname;
-                        var pn: string[] = [pathname];
-                        if (pathname.endsWith('.avif') || pathname.endsWith('.webp'))
-                        {
-                            var nextEnt = ents[x + 1][0];
-                            nextEnt = nextEnt.startsWith('/') ? nextEnt.substring(1) : nextEnt;
-                            pn = [pathname, newpathname.toString()];
-                            if (nextEnt.endsWith('.webp'))
-                            {
-                                var webp = [nextEnt.replace('.avif', '.webp'), newpathname.toString()];
-                                compilation.renameAsset(`/${nextEnt.replace('.avif', '.webp')}`, `${newpathname}${pathname.substring(pathname.lastIndexOf('.')).replace('.avif', '.webp')}`);
-                                a.push(webp);
-                                x++;
-                            }
-                        }
-                        else pn = [pathname, newpathname.toString()];
+                        var pn: string[] = [pathname, newpathname.toString()];
                         a.push(pn);
                     }
                 }

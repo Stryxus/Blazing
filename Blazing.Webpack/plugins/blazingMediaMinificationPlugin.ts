@@ -43,12 +43,10 @@ export default class BlazingMediaMinificationPlugin
                             if (imgSize && imgSize.width && imgSize.height) 
                             {
                                 var avif: Buffer | undefined;
-                                var webp: Buffer | undefined;
                                 const img = sharp(source.buffer());
                                 await resize(assetInfo, img, imgSize.width, imgSize.height);
-                                avif = await transcode(assetInfo, img, Format.AVIF);
-                                webp = await transcode(assetInfo, img, Format.WEBP);
-                                caches.set(sha1, [assetInfo.sourceFilename, avif, webp]);
+                                avif = await transcode(assetInfo, img);
+                                caches.set(sha1, [assetInfo.sourceFilename, avif]);
                             }
                             else console.error('For some reason, the image\'s width and height could not be retreived!');
                         }
@@ -62,19 +60,12 @@ export default class BlazingMediaMinificationPlugin
                         const relativeKey = val[0].substring(val[0].lastIndexOf('/'));
                         compilation.deleteAsset(relativeKey);
                         compilation.emitAsset(relativeKey.replace('.png', '.avif'), new sources.RawSource(val[1]));
-                        compilation.emitAsset(relativeKey.replace('.png', '.webp'), new sources.RawSource(val[2]));
                     }
                     else caches.delete(key);
                 }
             });
         });
     }
-}
-
-enum Format
-{
-    AVIF = 'AVIF',
-    WEBP = 'WebP',
 }
 
 async function resize(asset: AssetInfo, img: sharp.Sharp, width: number, height: number)
@@ -139,8 +130,7 @@ async function resize(asset: AssetInfo, img: sharp.Sharp, width: number, height:
     }
 }
 
-var carryQuality: number | undefined;
-async function transcode(asset: AssetInfo, img: sharp.Sharp, form: Format): Promise<Buffer | undefined>
+async function transcode(asset: AssetInfo, img: sharp.Sharp): Promise<Buffer | undefined>
 {
     const byteMaxSize = 100000;
     var buf: Buffer | undefined;
@@ -148,23 +138,13 @@ async function transcode(asset: AssetInfo, img: sharp.Sharp, form: Format): Prom
 
     for (var y = 0; y < (isDev ? 2 : 18); y++)
     {
-        quality = (carryQuality && Format.WEBP ? carryQuality : isDev ? 80 : 96) - y * (isDev ? 10 : 4);
-        switch (form)
-        {
-            case Format.AVIF:
-                img.avif({ quality: quality, effort: isDev ? 0 : 6 });
-                break;
-            case Format.WEBP:
-                img.webp({ quality: quality, effort: isDev ? 0 : 6 });
-                break;
-        }
+        quality = (isDev ? 80 : 96) - y * (isDev ? 10 : 4);
+        img.avif({ quality: quality, effort: isDev ? 0 : 6 });
         buf = await img.toBuffer();
         console.log(`Transcoded Image: ${Log.fg.yellow}${asset.sourceFilename}${Log.reset}` +
-            ` to ${Log.fg.green}${form.toString()}${Log.reset} at quality ${Log.fg.green}${quality}% [${(buf.byteLength / 1000).toLocaleString(undefined, { minimumFractionDigits: 3 })} KB]${Log.reset}.`);
+            ` to ${Log.fg.green}AVIF${Log.reset} at quality ${Log.fg.green}${quality}% [${(buf.byteLength / 1000).toLocaleString(undefined, { minimumFractionDigits: 3 })} KB]${Log.reset}.`);
         if (buf && buf.byteLength <= byteMaxSize) break;
     }
-    if (form == Format.AVIF) carryQuality = quality;
-    else if (form == Format.WEBP) carryQuality = undefined;
     if (buf && buf.byteLength <= byteMaxSize) return buf;
     return buf;
 }
