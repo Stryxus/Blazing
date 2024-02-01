@@ -9,7 +9,7 @@ import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 
 import { Log } from '../utils';
 
-const dev = process.env.NODE_ENV == 'dev';
+const isDev = process.env.NODE_ENV == 'dev';
 var caches: Map<string, any[]> = new Map<string, any[]>();
 
 export default class BlazingMediaMinificationPlugin
@@ -146,16 +146,16 @@ async function transcode(asset: AssetInfo, img: sharp.Sharp, form: Format): Prom
     var buf: Buffer | undefined;
     var quality: number | undefined;
 
-    for (var y = 0; y < (dev ? 3 : 18); y++)
+    for (var y = 0; y < (isDev ? 2 : 18); y++)
     {
-        quality = (carryQuality && Format.WEBP ? carryQuality : 96) - y * (dev ? 10 : 4);
+        quality = (carryQuality && Format.WEBP ? carryQuality : isDev ? 80 : 96) - y * (isDev ? 10 : 4);
         switch (form)
         {
             case Format.AVIF:
-                img.avif({ quality: quality, effort: dev ? 0 : 6 });
+                img.avif({ quality: quality, effort: isDev ? 0 : 6 });
                 break;
             case Format.WEBP:
-                img.webp({ quality: quality, effort: dev ? 0 : 6 });
+                img.webp({ quality: quality, effort: isDev ? 0 : 6 });
                 break;
         }
         buf = await img.toBuffer();

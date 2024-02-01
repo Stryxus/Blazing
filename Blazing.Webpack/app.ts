@@ -12,13 +12,10 @@ import BlazingMinificationPlugin from './plugins/blazingMinificationPlugin';
 import BlazingMediaMinificationPlugin from './plugins/blazingMediaMinificationPlugin';
 import BlazingCachePlugin from './plugins/blazingCachePlugin';
 
-var isDev: boolean | undefined;
+const isDev = process.env.NODE_ENV == 'dev';
 var argPath: string | undefined;
 
 process.argv.forEach((val, index, array) => {
-    if (val === '--env') {
-        isDev = (process.env.NODE_ENV = array[index + 1]) == 'dev';
-    }
     if (val === '--path') {
         argPath = array[index + 1];
     }
