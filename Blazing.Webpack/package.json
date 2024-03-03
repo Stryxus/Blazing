@@ -11,12 +11,8 @@
     "devDependencies": {
         "@types/node": "^20.8.9",
         "@types/webpack": "^5.28.4",
-        "@typescript-eslint/eslint-plugin": "^6.9.0",
-        "@typescript-eslint/parser": "^6.9.0",
         "autoprefixer": "^10.4.16",
         "css-loader": "^6.8.1",
-        "eslint": "^8.52.0",
-        "eslint-webpack-plugin": "^4.0.1",
         "file-loader": "^6.2.0",
         "html-webpack-plugin": "^5.5.3",
         "image-size": "^1.0.2",

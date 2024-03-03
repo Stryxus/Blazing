@@ -3,7 +3,6 @@ import process from 'process';
 
 import webpack, { Stats } from 'webpack';
 import * as MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import * as ESLintPlugin from 'eslint-webpack-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 
@@ -84,18 +83,6 @@ if (argPath)
         },
         plugins: [
             new MiniCssExtractPlugin.default({ filename: '0.css' }),
-            new ESLintPlugin.default(),
-            {
-                apply: (compiler: webpack.Compiler) => {
-                    if (!isDev) {
-                        compiler.hooks.done.tap('DonePlugin', () => {
-                            setTimeout(() => {
-                                process.exit(0)
-                            })
-                        });
-                    }
-                }
-            },
             new BlazingMinificationPlugin(),
             new BlazingMediaMinificationPlugin(),
             new BlazingCachePlugin(),
